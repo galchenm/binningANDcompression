@@ -145,6 +145,7 @@ def noneq_with_layer_compression_upt_function(file, N, lim_up, outputpath):
     os.system("sbatch %s" % job_file)
 
 
+
 if __name__ == "__main__":
     global path_to_data_cxi
     global path_to_data
@@ -157,46 +158,70 @@ if __name__ == "__main__":
         
     lim_up = args.lim_up
     
-    print(lim_up, lim_up is None)
-    
     
     if args.p is not None:
         path_from = args.p
-        for path, dirs, all_files in os.walk(path_from):
-            
-            for cdir in dirs:
-                path_from_dir = os.path.join(path, cdir)
-                if 'S000' not in cdir:
-                    
-                    files = glob.glob(os.path.join(path_from_dir, '*.cxi'))
-                    if len(files) == 0:
-                        files = glob.glob(os.path.join(path_from_dir, '*data*.h5'))
-                    if len(files) == 0:
-                        files = glob.glob(os.path.join(path_from_dir, '*.h5'))
-                    if len(files) > 0:
-                        #with Pool(processes=5) as pool:
-                        #    pool.map(int_compression_function, files)
-                        if args.eq:
-                            for file in files:
-                                int_compression_function_eq(file, args.n, lim_up, outputpath)
-                        if args.hv:
-                            for file in files:
-                                photon_compression_function_eq(file, args.n, lim_up, outputpath)                                
-                        if args.neqWo:
-                            for file in files:
-                                noneq_wo_layer_compression_upt_function(file, args.n, lim_up, outputpath)
-                        if args.neqWith:
-                            for file in files:
-                                noneq_with_layer_compression_upt_function(file, args.n, lim_up, outputpath)
-                        if args.c:
-                            for file in files:
-                                to_compress(file, outputpath)     
-                        if args.d:
-                            for file in files:
-                                to_decompress(file, outputpath) 
-                        if args.r:
-                            for file in files:
-                                to_round_Nbits(file, outputpath, args.n, lim_up)                                 
+        
+        files = glob.glob(os.path.join(path_from, '*.cxi'))
+        if len(files) == 0:
+            files = glob.glob(os.path.join(path_from, '*data*.h5'))
+        if len(files) == 0:
+            files = glob.glob(os.path.join(path_from, '*.h5'))
+        if len(files) > 0:
+            if args.eq:
+                for file in files:
+                    int_compression_function_eq(file, args.n, lim_up, outputpath)
+            if args.hv:
+                for file in files:
+                    photon_compression_function_eq(file, args.n, lim_up, outputpath)                                
+            if args.neqWo:
+                for file in files:
+                    noneq_wo_layer_compression_upt_function(file, args.n, lim_up, outputpath)
+            if args.neqWith:
+                for file in files:
+                    noneq_with_layer_compression_upt_function(file, args.n, lim_up, outputpath)
+            if args.c:
+                print('Here')
+                for file in files:
+                    to_compress(file, outputpath)     
+            if args.d:
+                for file in files:
+                    to_decompress(file, outputpath) 
+            if args.r:
+                for file in files:
+                    to_round_Nbits(file, outputpath, args.n, lim_up)  
+        else:
+            for path, dirs, all_files in os.walk(path_from):
+                for cdir in dirs:
+                    path_from_dir = os.path.join(path, cdir)
+                    if 'S000' not in cdir:
+                        files = glob.glob(os.path.join(path_from_dir, '*.cxi'))
+                        if len(files) == 0:
+                            files = glob.glob(os.path.join(path_from_dir, '*data*.h5'))
+                        if len(files) == 0:
+                            files = glob.glob(os.path.join(path_from_dir, '*.h5'))
+                        if len(files) > 0:
+                            if args.eq:
+                                for file in files:
+                                    int_compression_function_eq(file, args.n, lim_up, outputpath)
+                            if args.hv:
+                                for file in files:
+                                    photon_compression_function_eq(file, args.n, lim_up, outputpath)                                
+                            if args.neqWo:
+                                for file in files:
+                                    noneq_wo_layer_compression_upt_function(file, args.n, lim_up, outputpath)
+                            if args.neqWith:
+                                for file in files:
+                                    noneq_with_layer_compression_upt_function(file, args.n, lim_up, outputpath)
+                            if args.c:
+                                for file in files:
+                                    to_compress(file, outputpath)     
+                            if args.d:
+                                for file in files:
+                                    to_decompress(file, outputpath) 
+                            if args.r:
+                                for file in files:
+                                    to_round_Nbits(file, outputpath, args.n, lim_up)                                 
     elif args.f is not None:
         with open(args.f, 'r') as f:
             if args.eq:
