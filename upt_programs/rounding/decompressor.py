@@ -2,63 +2,23 @@ import os
 import sys
 import numpy as np
 import h5py as h5
-
-constant_base = 8
+import re
 
 def decompressor(x):
-    x_sign = np.sign(x)
-    if x == 0:
-        return 0
-    x = x_sign * x
-    power = x // constant_base
-    #print('power = ', power)
-    value = x % constant_base
-    value_bin = "{0:b}".format(int(value))
-    #print('value_bin = ', value_bin)
-    prev_x_bin = 10**power + int(value_bin)*10**(power-2)
-    #print('prev_x_bin = ', prev_x_bin)
-    prev_x = x_sign * int(str(prev_x_bin), 2)
-    #print('prev_x = ',prev_x)
-    return prev_x
+    sign_x = np.sign(x)
+    x = sign_x * x
+    binary_x = "{0:b}".format(x)
+    if len(binary_x) < 4:
+        return sign_x * x
+    binary_mantissa = binary_x[-3:]
+    binary_exponent = binary_x[:len(binary_x)-3]
+    exponent = int(binary_exponent, 2) + 1
+    binary_blank_value = '0' * exponent
+    binary_value = re.sub(r'^.{0,4}', '1' + binary_mantissa, binary_blank_value)
+    decompressed_value = int(str(binary_value), 2)
+    return sign_x * decompressed_value
 
-def decompressor_3bits(x):
-    x_sign = np.sign(x)
-    if x == 0:
-        return 0
-    x = x_sign * x
-    power = x // constant_base
-    print('power = ', power)
-    value = x % constant_base
-    value_bin = "{0:b}".format(int(value))
-    print('value_bin = ', value_bin)
-    if power < 3:
-        return x_sign * value
-    prev_x_bin = 10**power + int(value_bin)*10**(power-2)
-    print('prev_x_bin = ', prev_x_bin)
-    prev_x = x_sign * int(str(prev_x_bin), 2)
-    print('prev_x = ',prev_x)
-    return prev_x
-
-
-def decompressor_4bits(x):
-    x_sign = np.sign(x)
-    if x == 0:
-        return 0
-    x = x_sign * x
-    power = x // constant_base
-    print('power = ', power)
-    value = x % constant_base
-    value_bin = "{0:b}".format(int(value))
-    print('value_bin = ', value_bin)
-    if power < 4:
-        return x_sign * value
-    prev_x_bin = 10**power + int(value_bin)*10**(power-2)
-    print('prev_x_bin = ', prev_x_bin)
-    prev_x = x_sign * int(str(prev_x_bin), 2)
-    print('prev_x = ',prev_x)
-    return prev_x
-
-v_decompressor = np.vectorize(decompressor_4bits)
+v_decompressor = np.vectorize(decompressor)
 
 file_cxi = sys.argv[1]
 path_to_data_cxi = sys.argv[2]
@@ -72,7 +32,7 @@ else:
     out_file = file_cxi
     mode = 'a'
 
-with h5.File(file_cxi, mode) as f:
+with h5.File(out_file, mode) as f:
     if mode == 'a':
         data = f[path_to_data_cxi]
     else:
